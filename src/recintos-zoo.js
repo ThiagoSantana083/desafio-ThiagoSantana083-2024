@@ -10,51 +10,41 @@ class RecintosZoo {
         ];
 
         this.animais = [
-            {especie: "LEAO", tamanho: 3, bioma: "savana", carnivoro: true},
-            {especie: "LEOPARDO", tamanho: 2, bioma: "savana", carnivoro: true},
-            {especie: "CROCODILO", tamanho: 3, bioma: "rio", carnivoro: true},
-            {especie: "MACACO", tamanho: 1, bioma: "savana ou floresta", carnivoro: false},
-            {especie: "GAZELA", tamanho: 2, bioma: "savana", carnivoro: false},
-            {especie: "HIPOPOTAMO", tamanho: 4, bioma: "savana ou rio", carnivoro: false}
+            {especie: "LEAO", tamanho: 3, biomas: ["savana"], carnivoro: true},
+            {especie: "LEOPARDO", tamanho: 2, biomas: ["savana"], carnivoro: true},
+            {especie: "CROCODILO", tamanho: 3, biomas: ["rio"], carnivoro: true},
+            {especie: "MACACO", tamanho: 1, biomas: ["savana", "floresta"], carnivoro: false},
+            {especie: "GAZELA", tamanho: 2, biomas: ["savana"], carnivoro: false},
+            {especie: "HIPOPOTAMO", tamanho: 4, biomas: ["savana", "rio"], carnivoro: false}
         ];
     }
 
-    analisaRecintos(animal, quantidade) {
-        //const animaisValidos = ["LEAO", "LEOPARDO", "CROCODILO", "MACACO", "GAZELA", "HIPOPOTAMO"];
-        // Informação do animal
+    // Método para validar a entrada de dados do método
+    validaEntrada(animal, quantidade) {
         const animalInfo = this.animais.find(a => a.especie === animal);
-        // Verifica se o animal é válido ou não
 
-        /*if (!animaisValidos.includes(animal)) {
-            return {
-                erro: "Animal inválido",
-                recintosViaveis: null
-            };
-        }*/
         if (!animalInfo) {
             return {
                 erro: "Animal inválido",
-                recintosViaveis: null
             };
         }
 
-        // Verifica se quantidade é inválida
         if (quantidade <= 0) {
             return {
                 erro: "Quantidade inválida",
-                recintosViaveis: null
             };
         }
 
+        return animalInfo;
+    }
 
+    // Método para verificar e iterar sobre os recintos disponíveis 
+    getRecintosViaveis(animalInfo, animal, quantidade) {
         let recintosViaveis = [];
-
-        // Itera sobre os recintos disponíveis
-        for (const recinto of this.recintos) {
-
+         // Itera sobre os recintos disponíveis
+         for (const recinto of this.recintos) {
             let espacoNecessario = animalInfo.tamanho * quantidade;
             let espacoExtra = 0;
-
 
             // Verifica se já existe um animal da mesma espécie no recinto
 
@@ -79,19 +69,7 @@ class RecintosZoo {
             }
         }
 
-        // Ver se algum recinto viável foi encontrado
-        if (recintosViaveis.length === 0) {
-            return {
-                erro: "Não há recinto viável",
-                recintosViaveis: null
-            };
-        } 
-        
-        // Retorna a lista de recintos viáveis formatada
-        return {
-            erro: null,
-            recintosViaveis: this.formatarRecintosViaveis(recintosViaveis)
-        };
+        return recintosViaveis;
     }
 
     // Método para formatar a lista de recintos viáveis
@@ -99,6 +77,29 @@ class RecintosZoo {
         return recintos.map(recinto =>
             `${recinto.nome} (espaço livre: ${recinto.espacoLivre} total: ${recinto.espacoTotal})`
         );
+    }
+
+    analisaRecintos(animal, quantidade) {
+        const animalInfo = this.validaEntrada(animal, quantidade);
+
+        // Puxar o erro caso tiver
+        if (animalInfo.erro) {
+            return animalInfo;
+        }
+
+        const recintosViaveis = this.getRecintosViaveis(animalInfo, animal, quantidade);
+
+        // Ver se algum recinto viável foi encontrado
+        if (recintosViaveis.length === 0) {
+            return {
+                erro: "Não há recinto viável",
+            };
+        }
+        
+        // Retorna a lista de recintos viáveis formatada
+        return {
+            recintosViaveis: this.formatarRecintosViaveis(recintosViaveis)
+        };
     }
 
 }
