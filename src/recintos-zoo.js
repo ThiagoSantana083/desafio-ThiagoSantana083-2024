@@ -29,7 +29,7 @@ class RecintosZoo {
 
         return animalInfo;
     }
-
+    // Método para verificar se tem um carnivoro presente no recinto
     temCarnivoroPresente(recinto) {
         return recinto.animaisPresentes.some(animalNoRecinto => {
             const dadosAnimal = this.animais.find(a => a.especie === animalNoRecinto);
@@ -43,7 +43,6 @@ class RecintosZoo {
         let espacoNecessario = animalInfo.tamanho * quantidade;
 
         for (const recinto of this.recintos) {
-            // Verifica se já existe um animal da mesma espécie no recinto
             const mesmaEspecieNoRecinto = recinto.animaisPresentes.includes(animal);
             let espacoExtra = 0;
 
@@ -52,7 +51,7 @@ class RecintosZoo {
             
             if (!biomaCompativel) continue;
 
-            // Regra para hipopótamos: Só toleram outras espécies em recintos com "savana e rio", mas podem ficar sozinhos ou com sua própria espécie em outros biomas permitidos
+            // Hipopótamos: toleram outras espécies em "savana e rio" apenas. De resto apenas em algum de seus biomas
             if (animal === "HIPOPOTAMO") {
                 const possuiSavanaERio = biomasDoRecinto.includes("savana") && biomasDoRecinto.includes("rio");
 
@@ -61,15 +60,14 @@ class RecintosZoo {
                     if (outrosAnimais.length > 0 && !possuiSavanaERio) continue;
                 }
             }
-
-            // Verificar se um carnívoro está presente no recinto atual
-            const carnivoroPresente = this.temCarnivoroPresente(recinto);
+            
+            const carnivoroPresenteNoRecinto = this.temCarnivoroPresente(recinto);
 
             // Verificar se o animal passado como parâmetro é um carnívoro ou não e se pode estar no recinto atual 
             if (animalInfo.carnivoro && (recinto.animaisPresentes.length > 0 && !mesmaEspecieNoRecinto)) {
                 continue;
             }
-            if (!animalInfo.carnivoro && carnivoroPresente) {
+            if (!animalInfo.carnivoro && carnivoroPresenteNoRecinto) {
                 continue;
             }
             
@@ -78,7 +76,6 @@ class RecintosZoo {
                 espacoExtra = 1;
             }
 
-            // Calculando o espaço total com o espaço extra
             const espacoTotalNecessario = espacoNecessario + espacoExtra;
 
             // Regra para macacos: Macacos precisam estar com outro animal
@@ -86,7 +83,6 @@ class RecintosZoo {
 
             // Ver se o recinto tem espaço livre suficiente
             if (recinto.espacoLivre >= espacoNecessario) {
-                // Adiciona recinto viável à lista sem formatação
                 recintosViaveis.push({
                     nome: recinto.nome,
                     espacoLivre: recinto.espacoLivre - espacoTotalNecessario,
@@ -108,12 +104,10 @@ class RecintosZoo {
     analisaRecintos(animal, quantidade) {
         const animalInfo = this.validaEntradaDados(animal, quantidade);
 
-        // Puxar o erro caso tiver
         if (animalInfo.erro) return animalInfo;
 
         const recintosViaveis = this.getRecintosViaveis(animalInfo, animal, quantidade);
 
-        // Ver se algum recinto viável não foi encontrado
         if (recintosViaveis.length === 0) return { erro: "Não há recinto viável" };
 
         // Retorna a lista de recintos viáveis formatada
