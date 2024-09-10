@@ -19,23 +19,22 @@ class RecintosZoo {
         ];
     }
 
-    // Método para validar a entrada de dados do método
-    validaEntrada(animal, quantidade) {
+    // Método para validar a entrada de dados do método analisaRecintos
+    validaEntradaDados(animal, quantidade) {
         const animalInfo = this.animais.find(a => a.especie === animal);
 
-        if (!animalInfo) {
-            return {
-                erro: "Animal inválido",
-            };
-        }
+        if (!animalInfo) return { erro: "Animal inválido" };
 
-        if (quantidade <= 0) {
-            return {
-                erro: "Quantidade inválida",
-            };
-        }
+        if (quantidade <= 0) return { erro: "Quantidade inválida" };
 
         return animalInfo;
+    }
+
+    temCarnivoroPresente(recinto) {
+        return recinto.animaisPresentes.some(animalNoRecinto => {
+            const dadosAnimal = this.animais.find(a => a.especie === animalNoRecinto);
+            return dadosAnimal.carnivoro;
+        });
     }
 
     // Método para verificar e iterar sobre os recintos disponíveis 
@@ -45,17 +44,16 @@ class RecintosZoo {
 
         for (const recinto of this.recintos) {
             // Verifica se já existe um animal da mesma espécie no recinto
-            const mesmoAnimalNoRecinto = recinto.animaisPresentes.includes(animal);
+            const mesmaEspecieNoRecinto = recinto.animaisPresentes.includes(animal);
             let espacoExtra = 0;
 
             const biomasDoRecinto = recinto.bioma.split(" e ");
             const biomaCompativel = animalInfo.biomas.some(bioma => biomasDoRecinto.includes(bioma));
-
+            
             if (!biomaCompativel) continue;
 
             // Regra para hipopótamos: Só toleram outras espécies em recintos com "savana e rio", mas podem ficar sozinhos ou com sua própria espécie em outros biomas permitidos
             if (animal === "HIPOPOTAMO") {
-                const biomasDoRecinto = recinto.bioma.split(" e ");
                 const possuiSavanaERio = biomasDoRecinto.includes("savana") && biomasDoRecinto.includes("rio");
 
                 if (recinto.animaisPresentes.length > 0) {
@@ -65,23 +63,20 @@ class RecintosZoo {
             }
 
             // Verificar se um carnívoro está presente no recinto atual
-            const carnivoroPresente = recinto.animaisPresentes.some(animalNoRecinto => {
-                const dadosAnimal = this.animais.find(a => a.especie === animalNoRecinto);
-                return dadosAnimal && dadosAnimal.carnivoro;
-            });
+            const carnivoroPresente = this.temCarnivoroPresente(recinto);
 
             // Verificar se o animal passado como parâmetro é um carnívoro ou não e se pode estar no recinto atual 
-            if (animalInfo.carnivoro) {
-                if (recinto.animaisPresentes.length > 0 && !mesmoAnimalNoRecinto) continue;
-            } else {
-                if (carnivoroPresente) continue;
+            if (animalInfo.carnivoro && (recinto.animaisPresentes.length > 0 && !mesmaEspecieNoRecinto)) {
+                continue;
             }
-
+            if (!animalInfo.carnivoro && carnivoroPresente) {
+                continue;
+            }
+            
             // Se o recinto contém outros animais e não possui um animal da mesma espécie igual o passado, adicione um espaço extra
-            if (recinto.animaisPresentes.length > 0 && !mesmoAnimalNoRecinto) {
+            if (recinto.animaisPresentes.length > 0 && !mesmaEspecieNoRecinto) {
                 espacoExtra = 1;
             }
-
 
             // Calculando o espaço total com o espaço extra
             const espacoTotalNecessario = espacoNecessario + espacoExtra;
@@ -90,7 +85,7 @@ class RecintosZoo {
             if (animal === "MACACO" && recinto.animaisPresentes.length === 0 && quantidade === 1) continue;
 
             // Ver se o recinto tem espaço livre suficiente
-           if (recinto.espacoLivre >= espacoNecessario) {
+            if (recinto.espacoLivre >= espacoNecessario) {
                 // Adiciona recinto viável à lista sem formatação
                 recintosViaveis.push({
                     nome: recinto.nome,
@@ -111,21 +106,15 @@ class RecintosZoo {
     }
 
     analisaRecintos(animal, quantidade) {
-        const animalInfo = this.validaEntrada(animal, quantidade);
+        const animalInfo = this.validaEntradaDados(animal, quantidade);
 
         // Puxar o erro caso tiver
-        if (animalInfo.erro) {
-            return animalInfo;
-        }
+        if (animalInfo.erro) return animalInfo;
 
         const recintosViaveis = this.getRecintosViaveis(animalInfo, animal, quantidade);
 
-        // Ver se algum recinto viável foi encontrado
-        if (recintosViaveis.length === 0) {
-            return {
-                erro: "Não há recinto viável",
-            };
-        }
+        // Ver se algum recinto viável não foi encontrado
+        if (recintosViaveis.length === 0) return { erro: "Não há recinto viável" };
 
         // Retorna a lista de recintos viáveis formatada
         return {
