@@ -89,11 +89,8 @@ class RecintosZoo {
             // Regra para macacos: Macacos precisam estar com outro animal
             if (animal === "MACACO" && recinto.animaisPresentes.length === 0 && quantidade === 1) continue;
 
-            // Regra para não separar lotes de animais
-            if (recinto.espacoLivre < espacoNecessario) continue;
-
             // Ver se o recinto tem espaço livre suficiente
-            if (recinto.espacoLivre >= espacoNecessario) {
+           if (recinto.espacoLivre >= espacoNecessario) {
                 // Adiciona recinto viável à lista sem formatação
                 recintosViaveis.push({
                     nome: recinto.nome,
